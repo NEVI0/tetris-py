@@ -1,98 +1,136 @@
-import pygame
+# Imports
+import pygame, sys
 
+from pygame.locals import *
 from tetris import Tetris
 
-pygame.init()
+pygame.init() # Initialize Pygame
+pygame.display.set_caption('Tetris Py') # Game Title
+pygame.display.set_icon(pygame.image.load('assets/game_logo.png')) # Game Icon
 
+# Game Music
+# pygame.mixer.music.set_volume(0.3)
+# pygame.mixer.music.load('assets/soundtrack.mp3')
+# pygame.mixer.music.play(-1)
+
+# Color Contants
 BLACK: tuple = (0, 0, 0)
-WHITE: tuple = (255, 255, 255)
-GRAY: tuple = (128, 128, 128)
-COLORS: tuple = (
-    (0, 0, 0),
-    (120, 37, 179),
-    (100, 179, 179),
-    (80, 34, 22),
-    (80, 134, 22),
-    (180, 34, 22),
-    (180, 34, 122)
-)
+GRAY: tuple = (219, 219, 219)
+COLORS: tuple = ((0, 0, 0), (120, 37, 179), (100, 179, 179), (80, 34, 22), (80, 134, 22), (180, 34, 22), (180, 34, 122))
 
-size = (400, 500)
-screen = pygame.display.set_mode(size)
+# Game Config Contants
+WINDOW_SIZE: tuple = (400, 500)
+GAME_SCREEN: pygame.Surface = pygame.display.set_mode(WINDOW_SIZE)
+GAME_FONT = pygame.font.SysFont('Trebuchet MS', 24, True, True)
+TIMER = pygame.time.Clock()
+FPS = 60
 
-pygame.display.set_caption('Tetris Py')
-
+# Game Config Variables
+pressing_down = False
 done = False
-clock = pygame.time.Clock()
-fps = 25
-game: Tetris = Tetris(20, 10)
 counter = 0
 
-pressing_down = False
+game_obj: Tetris = Tetris(20, 10) # Initialize Tetris Object
 
+# Game Over Screen
+def game_over() -> None:
+
+    GAME_SCREEN.fill((255, 255, 255))  # Deixa a tela branca
+
+    # Game Over Message
+    end_message = GAME_FONT.render(f'Game Over! You got {game_obj.score} points. Press ESC to restart!', True, (0, 0, 0)) 
+    end_message_rect = end_message.get_rect()
+    end_message_rect.center = (WINDOW_SIZE[0] // 2, WINDOW_SIZE[1] // 2) # Centers message at the middle of screen
+
+    # Game Events
+    for e in pygame.event.get():
+        if e.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+        if e.type == KEYDOWN:
+            if e.key == K_ESCAPE:
+                # restart() Restart Game
+                game_obj.__init__(20, 10) # Restart Game
+
+    GAME_SCREEN.blit(end_message, end_message_rect) # Renders Game Over Message
+    pygame.display.update() # Update Game Screen
+
+# Game Loop
 while not done:
-    if game.block is None:
-        game.new_figure()
-    counter += 1
-    if counter > 100000:
+
+    if game_obj.state == 'gameover':
+        game_over()
+
+    points_text = GAME_FONT.render(f'Pontos: {game_obj.score}', True, (0, 0, 0)) # Points Text
+    points_text_rect = points_text.get_rect()
+    points_text_rect.center = (0, 0)
+
+    GAME_SCREEN.fill((255, 255, 255))  # White Background Color
+
+    # Renders a new block if none
+    if game_obj.block is None:
+        game_obj.new_figure()
+    
+    counter += 1 # Increase Counter
+
+    # Reset counter if bigger than 10000000
+    if counter > 10000000:
         counter = 0
 
-    if counter % (fps // game.level // 2) == 0 or pressing_down:
-        if game.state == "start":
-            game.go_down()
+    if counter % (FPS // game_obj.level // 2) == 0 or pressing_down:
+        if game_obj.state == 'start':
+            game_obj.go_down()
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    # Game Events
+    for ev in pygame.event.get():
+        # Quit Event
+        if ev.type == QUIT:
             done = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                game.rotate()
-            if event.key == pygame.K_DOWN:
+
+        # Keyboard Events
+        if ev.type == KEYDOWN:
+            if ev.key == K_UP:
+                game_obj.rotate()
+
+            if ev.key == K_DOWN:
                 pressing_down = True
-            if event.key == pygame.K_LEFT:
-                game.go_side(-1)
-            if event.key == pygame.K_RIGHT:
-                game.go_side(1)
-            if event.key == pygame.K_SPACE:
-                game.go_space()
-            if event.key == pygame.K_ESCAPE:
-                game.__init__(20, 10)
 
-    if event.type == pygame.KEYUP:
-            if event.key == pygame.K_DOWN:
-                pressing_down = False
+            if ev.key == K_LEFT:
+                game_obj.go_side(-1)
 
-    screen.fill(WHITE)
+            if ev.key == K_RIGHT:
+                game_obj.go_side(1)
 
-    for i in range(game.height):
-        for j in range(game.width):
-            pygame.draw.rect(screen, GRAY, [game.x + game.zoom * j, game.y + game.zoom * i, game.zoom, game.zoom], 1)
-            if game.field[i][j] > 0:
-                pygame.draw.rect(screen, COLORS[game.field[i][j]],
-                                 [game.x + game.zoom * j + 1, game.y + game.zoom * i + 1, game.zoom - 2, game.zoom - 1])
+            if ev.key == K_SPACE:
+                game_obj.go_space()
 
-    if game.block is not None:
+            if ev.key == K_ESCAPE:
+                game_obj.__init__(20, 10)
+
+        # Checks if the user is typing KEYUP
+        if ev.type == pygame.KEYUP:
+            if ev.key == pygame.K_DOWN:
+                pressing_down = False # Then, just move
+
+    for i in range(game_obj.height):
+        for j in range(game_obj.width):
+            pygame.draw.rect(GAME_SCREEN, GRAY, [game_obj.x + game_obj.zoom * j, game_obj.y + game_obj.zoom * i, game_obj.zoom, game_obj.zoom], 1)
+            if game_obj.field[i][j] > 0:
+                pygame.draw.rect(GAME_SCREEN, COLORS[game_obj.field[i][j]],
+                                 [game_obj.x + game_obj.zoom * j + 1, game_obj.y + game_obj.zoom * i + 1, game_obj.zoom - 2, game_obj.zoom - 1])
+
+    if game_obj.block is not None:
         for i in range(4):
             for j in range(4):
                 p = i * 4 + j
-                if p in game.block.image():
-                    pygame.draw.rect(screen, COLORS[game.block.color],
-                                     [game.x + game.zoom * (j + game.block.x) + 1,
-                                      game.y + game.zoom * (i + game.block.y) + 1,
-                                      game.zoom - 2, game.zoom - 2])
-
-    font = pygame.font.SysFont('Calibri', 25, True, False)
-    font1 = pygame.font.SysFont('Calibri', 65, True, False)
-    text = font.render("Score: " + str(game.score), True, BLACK)
-    text_game_over = font1.render("Game Over", True, (255, 125, 0))
-    text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
-
-    screen.blit(text, [0, 0])
-    if game.state == "gameover":
-        screen.blit(text_game_over, [20, 200])
-        screen.blit(text_game_over1, [25, 265])
+                if p in game_obj.block.image():
+                    pygame.draw.rect(GAME_SCREEN, COLORS[game_obj.block.color],
+                                     [game_obj.x + game_obj.zoom * (j + game_obj.block.x) + 1,
+                                      game_obj.y + game_obj.zoom * (i + game_obj.block.y) + 1,
+                                      game_obj.zoom - 2, game_obj.zoom - 2])
 
     pygame.display.flip()
-    clock.tick(fps)
+    TIMER.tick(FPS) # Runs Game in 60 FPS
 
 pygame.quit()
