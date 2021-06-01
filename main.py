@@ -9,9 +9,9 @@ pygame.display.set_caption('Tetris Py') # Game Title
 pygame.display.set_icon(pygame.image.load('assets/game_logo.png')) # Game Icon
 
 # Game Music
-# pygame.mixer.music.set_volume(0.3)
-# pygame.mixer.music.load('assets/soundtrack.mp3')
-# pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.load('assets/soundtrack.mp3')
+pygame.mixer.music.play(-1)
 
 # Color Contants
 BLACK: tuple = (0, 0, 0)
