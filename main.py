@@ -5,32 +5,32 @@ from pygame.locals import *
 from tetris import Tetris
 
 pygame.init() # Initialize Pygame
-pygame.display.set_caption('Tetris Py') # Game Title
-pygame.display.set_icon(pygame.image.load('assets/game_logo.png')) # Game Icon
+pygame.display.set_caption('Tetris Py') # Game title
+pygame.display.set_icon(pygame.image.load('assets/game_logo.png')) # Game icon
 
-# Game Music
+# Game music
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.load('assets/soundtrack.mp3')
 pygame.mixer.music.play(-1)
 
-# Color Contants
+# Color contants
 BLACK: tuple = (0, 0, 0)
 GRAY: tuple = (219, 219, 219)
 COLORS: tuple = ((0, 0, 0), (120, 37, 179), (100, 179, 179), (80, 34, 22), (80, 134, 22), (180, 34, 22), (180, 34, 122))
 
-# Game Config Contants
+# Game config contants
 WINDOW_SIZE: tuple = (400, 500)
 GAME_SCREEN: pygame.Surface = pygame.display.set_mode(WINDOW_SIZE)
 GAME_FONT = pygame.font.SysFont('Trebuchet MS', 24, True, True)
 TIMER = pygame.time.Clock()
 FPS = 60
 
-# Game Config Variables
+# Game config variables
 pressing_down = False
 done = False
 counter = 0
 
-game_obj: Tetris = Tetris(20, 10) # Initialize Tetris Object
+game_obj: Tetris = Tetris(20, 10) # Initialize tetris object
 
 # Game Over Screen
 def game_over() -> None:
